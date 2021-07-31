@@ -63,10 +63,11 @@ const errorHandler = (error) => {
   throw error;
 };
 
-export const xFetch = async (url, options = {}, config) => {
+export const xFetch = async (url, options = {}, config = {}) => {
+  const { withPrefix = true } = config;
   try {
     const token = "Bearer " + localStorage.getItem("token");
-    const response = await fetch(url, {
+    const response = await fetch(withPrefix ? `/api${url}` : url, {
       ...options,
       headers: {
         Authorization: token,
