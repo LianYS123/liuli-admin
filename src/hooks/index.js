@@ -16,12 +16,12 @@ const defaultFormatter = ({ data = [] } = {}) => {
 
 const errorHandler = (error, history) => {
   const { response } = error;
-  if (response && response.status === 401) {
-    console.log("redirect to login");
-    history.push({
-      pathname: "/login",
-    });
-  }
+  // if (response && response.status === 401) {
+  //   console.log("redirect to login");
+  //   history.push({
+  //     pathname: "/login",
+  //   });
+  // }
 };
 
 export const useRequest = (opt) => {

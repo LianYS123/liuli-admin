@@ -4,20 +4,35 @@ import { useTable } from "hooks";
 import { getArticles } from "service/article";
 import dayjs from "dayjs";
 import { DATE_FORMATE } from "constants/index";
-import { Button, Chip, Container, Input, Link } from "@material-ui/core";
+import {
+  Button,
+  Chip,
+  Container,
+  FormControl,
+  Input,
+  InputLabel,
+  Link,
+  MenuItem,
+  Select,
+} from "@material-ui/core";
 import { Text } from "components/Text";
 import { useFormik } from "formik";
 import { Image } from "components/Image";
 
 export const Article = () => {
+  const initialValues = {
+    keyword: "",
+    order: "time",
+    orderType: "desc",
+  };
+
   const { tableProps, search } = useTable({
     method: getArticles,
+    initialParams: initialValues,
   });
 
   const formik = useFormik({
-    initialValues: {
-      keyword: "",
-    },
+    initialValues,
     onSubmit: (values) => {
       console.log(values);
       search(values);
@@ -34,7 +49,7 @@ export const Article = () => {
       dataIndex: "title",
       width: 150,
       render: (title, { href }) => {
-        return <Link href={href}>{title}</Link>;
+        return <Link target="_blank" href={href}>{title}</Link>;
       },
     },
     {
@@ -89,11 +104,14 @@ export const Article = () => {
       dataIndex: "uid",
       width: 100,
       render: (uid) => {
-        return (
-          <Text limit={5} copy={true} wrap={false}>
-            {uid}
-          </Text>
-        );
+        const uids = uid.split("|");
+        return uids.map((it) => (
+          <div>
+            <Text limit={20} copy={true} wrap={false}>
+              {"magnet:?xt=urn:btih:" + it}
+            </Text>
+          </div>
+        ));
       },
     },
     {
@@ -126,13 +144,48 @@ export const Article = () => {
 
   return (
     <Container>
-      <form style={{ margin: "8px 0" }} onSubmit={formik.handleSubmit}>
-        <Input
-          type="search"
-          name="keyword"
-          value={formik.values.keyword}
-          onChange={formik.handleChange}
-        />
+      <form style={{ margin: "16px 0" }} onSubmit={formik.handleSubmit}>
+        <FormControl
+          style={{ marginRight: 16 }}
+          variant="standard"
+          size="small"
+        >
+          <Input
+            type="search"
+            name="keyword"
+            value={formik.values.keyword}
+            onChange={formik.handleChange}
+          />
+        </FormControl>
+        <FormControl
+          style={{ marginRight: 16 }}
+          variant="standard"
+          size="small"
+        >
+          {/* <InputLabel>排序</InputLabel> */}
+          <Select
+            style={{ width: 200 }}
+            name="orderType"
+            value={formik.values.orderType}
+            onChange={formik.handleChange}
+          >
+            <MenuItem value="asc">升序</MenuItem>
+            <MenuItem value="desc">降序</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl variant="standard" size="small">
+          {/* <InputLabel>排序</InputLabel> */}
+          <Select
+            style={{ width: 200 }}
+            name="order"
+            value={formik.values.order}
+            onChange={formik.handleChange}
+          >
+            <MenuItem value="time">时间</MenuItem>
+            <MenuItem value="rating_score">评分</MenuItem>
+            <MenuItem value="rating_count">热度</MenuItem>
+          </Select>
+        </FormControl>
         <Button type="submit">搜索</Button>
       </form>
       <MyTable columns={columns} {...tableProps} />

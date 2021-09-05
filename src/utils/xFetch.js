@@ -1,3 +1,4 @@
+import { routers } from "config/routers";
 import qs from "query-string";
 
 const codeMessage = {
@@ -30,10 +31,8 @@ const showError = (opts) => {
 
 const jumpLogin = (response) => {
   if (response && response.status === 401) {
-    // console.log("redirect to login");
-    // history.push({
-    //   pathname: "/login",
-    // });
+    console.log("redirect to login");
+    location.pathname = routers.LOGIN;
     return true;
   }
   return false;
@@ -64,27 +63,33 @@ const errorHandler = (error) => {
 };
 
 export const xFetch = async (url, options = {}, config = {}) => {
-  const { withPrefix = true } = config;
+  const { withPrefix = true, isUpload = false } = config;
+  const token = "Bearer " + localStorage.getItem("token");
+  const headers = {
+    Authorization: token,
+    ...options.headers,
+  };
+  if (!isUpload) {
+    headers["Content-Type"] = "application/json";
+  } else {
+    // headers["Content-Type"] = "multipart/form-data";
+  }
   try {
-    const token = "Bearer " + localStorage.getItem("token");
     const response = await fetch(withPrefix ? `/api${url}` : url, {
       ...options,
-      headers: {
-        Authorization: token,
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers,
     });
-    if (!response.ok) {
-      const error = new Error("request error");
-      error.response = response;
-      throw error;
-    }
 
     // if (isJumped) {
     //   return;
     // }
     const result = await response.json();
+
+    if (!response.ok) {
+      const error = new Error("request error");
+      error.response = response;
+      errorHandler(error);
+    }
     return result;
   } catch (error) {
     return errorHandler(error);
@@ -105,6 +110,21 @@ export const post = (url, data, options) => {
     body: data && JSON.stringify(data),
     ...options,
   });
+};
+
+export const upload = (file) => {
+  const url = "/upload";
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return xFetch(
+    url,
+    {
+      method: "POST",
+      body: formData,
+    },
+    { isUpload: true }
+  );
 };
 
 export const del = (url, data, options) => {

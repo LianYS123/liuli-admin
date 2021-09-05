@@ -9,9 +9,10 @@ export default defineConfig({
     port: 3001,
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: "http://localhost:9090",
+        // target: "http://admin.lianys.fun",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        // rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },
